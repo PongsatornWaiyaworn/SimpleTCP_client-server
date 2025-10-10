@@ -15,5 +15,7 @@ g++ client.cpp -o client -lws2_32
 ./server
 ```
 ```bash
-./client localhost 5 # [hostname or IP address] [input value]
+#./client [hostname or IP address] [input value]
+# ex.
+./client localhost 5 
 ```
