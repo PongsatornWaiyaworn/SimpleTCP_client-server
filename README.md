@@ -53,8 +53,6 @@ Client                             Server
   (Connection Closed)
 ```
 
-### TCP Flow: Square Calculator (Client ↔ Server)
-
 #### 1. TCP Handshake (3-way handshake)
 - **Client ส่ง SYN → Server**  
   Client แจ้งว่าอยากเริ่มเชื่อมต่อ TCP
