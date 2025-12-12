@@ -15,10 +15,83 @@
 | **พอร์ตมาตรฐาน** | 1235 |
 | **ฟังก์ชันที่คำนวณ** | $f(x) = x^2$ |
 
-## 📁 โครงสร้างไฟล์และหน้าที่
+## โครงสร้างไฟล์และหน้าที่
 
 1.  **`server.cpp` (เซิร์ฟเวอร์):** ทำหน้าที่เป็น Listener บนพอร์ต 1235, รับค่า `x` ในรูปของไบนารี (`int`), คำนวณผลลัพธ์, และส่งกลับ
 2.  **`client.cpp` (ไคลเอนต์):** ทำหน้าที่เชื่อมต่อไปยังเซิร์ฟเวอร์, รับพารามิเตอร์ hostname และค่า `x` จาก Command Line, ส่งค่า `x`, และแสดงผลลัพธ์ $f(x)$
+
+## TCP Flow Diagram: Square Calculator (Client ↔ Server)
+
+```text
+Client                             Server
+  |                                   |
+  |--- SYN -------------------------->|
+  |                                   |
+  |<-- SYN-ACK -----------------------|
+  |                                   |
+  |--- ACK -------------------------->|
+  |   (TCP Connection Established)    |
+  |                                   |
+  |--- send(x) ---------------------->|
+  |        (send integer x)           |
+  |                                   |
+  |<-- ACK ---------------------------|
+  |                                   |
+  |<-- send(f(x)) --------------------|
+  |       (Server computes x^2)       |
+  |                                   |
+  |--- ACK -------------------------->|
+  |                                   |
+  | (Client displays result)          |
+  |                                   |
+  |--- FIN -------------------------->|
+  |                                   |
+  |<-- FIN-ACK -----------------------|
+  |                                   |
+  |--- ACK -------------------------->|
+  |                                   |
+  (Connection Closed)
+```
+
+### TCP Flow: Square Calculator (Client ↔ Server)
+
+#### 1. TCP Handshake (3-way handshake)
+- **Client ส่ง SYN → Server**  
+  Client แจ้งว่าอยากเริ่มเชื่อมต่อ TCP
+- **Server ตอบ SYN-ACK → Client**  
+  Server ยืนยันว่าได้รับ SYN และพร้อมเชื่อมต่อ
+- **Client ส่ง ACK → Server**  
+  Client ยืนยันการเชื่อมต่อ
+- **Result:** Connection Established
+
+#### 2. Data Transfer
+- **Client send(x) → Server**  
+  Client ส่งค่า integer x ที่ต้องการคำนวณ
+- **Server ACK และคำนวณ f(x) = x²**  
+  Server รับค่า x, คำนวณผลลัพธ์
+- **Server send(f(x)) → Client**  
+  Server ส่งผลลัพธ์กลับไป Client
+- **Client ACK และแสดงผล**  
+  Client ยืนยันการรับผลลัพธ์และแสดงบนหน้าจอ
+
+#### 3. Connection Termination (4-way handshake)
+- **Client ส่ง FIN → Server**  
+  Client แจ้งว่าจะปิดการเชื่อมต่อ
+- **Server ส่ง FIN-ACK → Client**  
+  Server ยืนยันและอาจส่ง FIN ของตัวเอง
+- **Client ส่ง ACK → Server**  
+  Client ยืนยันการปิด connection
+- **Result:** Connection Closed
+
+### TCP Flags Explanation
+
+| Flag       | Full Name                   | ใช้ทำอะไร | ตัวอย่าง (Sequence / ACK) | คำอธิบาย |
+|------------|----------------------------|------------|---------------------------|-----------|
+| **SYN**   | Synchronize                | เริ่มต้น TCP connection | Client → Server : SYN seq=100 | Client แจ้งว่าอยากเริ่มเชื่อมต่อ TCP, มี sequence number เพื่อบอกตำแหน่งข้อมูลเริ่มต้น |
+| **SYN-ACK** | Synchronize-Acknowledge    | ตอบรับ SYN และพร้อมเชื่อมต่อ | Server → Client : SYN seq=200, ACK=101 | Server ส่ง SYN ยืนยันตัวเองพร้อม ACK ยืนยันว่าได้รับ SYN ของ Client แล้ว (ACK = sequence number ของ client + 1) |
+| **ACK**   | Acknowledge                | ยืนยันข้อมูลที่รับมา | Client → Server : ACK=201 | ใช้ยืนยันข้อมูลที่ส่งมาก่อนหน้านั้นถูกต้องครบถ้วน, หลัง handshake 3-way TCP connection ถูกสร้างเรียบร้อย |
+| **FIN**   | Finish                     | เริ่มปิด TCP connection | Client → Server : FIN seq=300 | ฝั่งที่ส่ง FIN แจ้งว่าข้อมูลส่งหมดแล้ว ต้องการปิด connection |
+| **FIN-ACK** | Finish-Acknowledge         | ยืนยันการปิด connection | Server → Client : FIN-ACK seq=400, ACK=301 | ฝั่งรับ FIN ตอบกลับเพื่อยืนยันการปิด connection, อาจส่ง FIN ของตัวเองพร้อมกัน |
 
 ## การคอมไพล์และการรันโปรแกรม
 
